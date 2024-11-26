@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, status
 
-from project.schemas.user import ClientBase, ClientCreate, Client
+from project.schemas.user import ClientCreate, Client, DrinkCreate, Drink
 from project.schemas.healthcheck import HealthCheckSchema
-from project.core.exceptions import UserNotFound, UserAlreadyExists
-from project.api.depends import database, user_repo
+from project.core.exceptions import UserNotFound, UserAlreadyExists, DrinkNotFound, DrinkAlreadyExists
+from project.api.depends import database, user_repo, drink_repo
 
 
 router = APIRouter()
@@ -18,7 +18,7 @@ async def check_health() -> HealthCheckSchema:
         db_is_ok=db_is_ok,
     )
 
-
+# Client
 @router.get("/all_users", response_model=list[Client], status_code=status.HTTP_200_OK)
 async def get_all_users() -> list[Client]:
     async with database.session() as session:
@@ -86,3 +86,71 @@ async def delete_user(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
 
     return user
+
+
+# Drink
+
+@router.get("/all_drinks", response_model=list[Drink], status_code=status.HTTP_200_OK)
+async def get_all_drinks() -> list[Drink]:
+    async with database.session() as session:
+        all_drinks = await drink_repo.get_all_drinks(session=session)
+    return all_drinks
+
+
+@router.get("/drink/{drink_id}", response_model=Drink, status_code=status.HTTP_200_OK)
+async def get_drink_by_id(
+    drink_id: int,
+) -> Drink:
+    try:
+        async with database.session() as session:
+            drink = await drink_repo.get_drink_by_id(session=session, drink_id=drink_id)
+    except DrinkNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    return drink
+
+
+@router.post("/add_drink", response_model=Drink, status_code=status.HTTP_201_CREATED)
+async def add_drink(
+    drink_dto: DrinkCreate,
+) -> Drink:
+    try:
+        async with database.session() as session:
+            new_drink = await drink_repo.create_drink(session=session, drink=drink_dto)
+            await session.commit()
+    except DrinkAlreadyExists as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
+    return new_drink
+
+
+@router.put(
+    "/update_drink/{drink_id}",
+    response_model=Drink,
+    status_code=status.HTTP_200_OK,
+)
+async def update_drink(
+    drink_id: int,
+    drink_dto: DrinkCreate,
+) -> Drink:
+    try:
+        async with database.session() as session:
+            updated_drink = await drink_repo.update_drink(
+                session=session,
+                drink_id=drink_id,
+                drink=drink_dto,
+            )
+            await session.commit()
+    except DrinkNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    return updated_drink
+
+
+@router.delete("/delete_drink/{drink_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_drink(
+    drink_id: int,
+) -> None:
+    try:
+        async with database.session() as session:
+            await drink_repo.delete_drink(session=session, drink_id=drink_id)
+            await session.commit()
+    except DrinkNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)

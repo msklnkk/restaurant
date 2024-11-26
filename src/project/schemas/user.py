@@ -9,10 +9,8 @@ class ClientBase(BaseModel):
     mail: Optional[str]
     discount_percentage: Optional[int]
 
-
 class ClientCreate(ClientBase):
     pass
-
 
 class Client(ClientBase):
     clientid: int
@@ -20,14 +18,11 @@ class Client(ClientBase):
     class Config:
         orm_mode = True
 
-
 class DrinkBase(BaseModel):
     name: Optional[str]
 
-
 class DrinkCreate(DrinkBase):
     pass
-
 
 class Drink(DrinkBase):
     drinkid: int
@@ -35,15 +30,12 @@ class Drink(DrinkBase):
     class Config:
         orm_mode = True
 
-
 class PriceBase(BaseModel):
     count: Optional[int]
     price: Optional[Decimal]
 
-
 class PriceCreate(PriceBase):
     pass
-
 
 class Price(PriceBase):
     dishid: int
@@ -51,21 +43,17 @@ class Price(PriceBase):
     class Config:
         orm_mode = True
 
-
 class ProductBase(BaseModel):
     name: Optional[str]
 
-
 class ProductCreate(ProductBase):
     pass
-
 
 class Product(ProductBase):
     productid: int
 
     class Config:
         orm_mode = True
-
 
 class StaffBase(BaseModel):
     name: Optional[str]
@@ -74,10 +62,8 @@ class StaffBase(BaseModel):
     salary: Optional[Decimal]
     contact_info: Optional[int]
 
-
 class StaffCreate(StaffBase):
     pass
-
 
 class Staff(StaffBase):
     staffid: int
@@ -85,16 +71,13 @@ class Staff(StaffBase):
     class Config:
         orm_mode = True
 
-
 class SupplierBase(BaseModel):
     name: Optional[str]
     contact_info: Optional[str]
     address: Optional[str]
 
-
 class SupplierCreate(SupplierBase):
     pass
-
 
 class Supplier(SupplierBase):
     supplierid: int
@@ -102,15 +85,12 @@ class Supplier(SupplierBase):
     class Config:
         orm_mode = True
 
-
 class TableBase(BaseModel):
     capacity: Optional[int]
     location: Optional[str]
 
-
 class TableCreate(TableBase):
     pass
-
 
 class Table(TableBase):
     tableid: int
@@ -118,14 +98,11 @@ class Table(TableBase):
     class Config:
         orm_mode = True
 
-
 class DeliveryBase(BaseModel):
     datedelivery: Optional[date]
 
-
 class DeliveryCreate(DeliveryBase):
     pass
-
 
 class Delivery(DeliveryBase):
     deliveryid: int
@@ -133,23 +110,19 @@ class Delivery(DeliveryBase):
     class Config:
         orm_mode = True
 
-
 class DishBase(BaseModel):
     name: Optional[str]
     type: Optional[str]
     recipe: Optional[str]
 
-
 class DishCreate(DishBase):
     pass
-
 
 class Dish(DishBase):
     dishid: int
 
     class Config:
         orm_mode = True
-
 
 class OrderBase(BaseModel):
     tableid: Optional[int]
@@ -160,10 +133,8 @@ class OrderBase(BaseModel):
     clientid: Optional[int]
     payment_method: Optional[str]
 
-
 class OrderCreate(OrderBase):
     pass
-
 
 class Order(OrderBase):
     orderid: int
@@ -171,16 +142,13 @@ class Order(OrderBase):
     class Config:
         orm_mode = True
 
-
 class ProductInDeliveryBase(BaseModel):
     count: Optional[int]
     cost: Optional[Decimal]
 
-
 class ProductInDeliveryCreate(ProductInDeliveryBase):
     productid: int
     deliveryid: int
-
 
 class ProductInDelivery(ProductInDeliveryBase):
     productid: int
@@ -189,15 +157,12 @@ class ProductInDelivery(ProductInDeliveryBase):
     class Config:
         orm_mode = True
 
-
 class ShelfLifeBase(BaseModel):
     expirationdate: Optional[date]
     deliveryID: Optional[int]
 
-
 class ShelfLifeCreate(ShelfLifeBase):
     pass
-
 
 class ShelfLife(ShelfLifeBase):
     shelflifeid: int
@@ -205,15 +170,12 @@ class ShelfLife(ShelfLifeBase):
     class Config:
         orm_mode = True
 
-
 class OrderedDishBase(BaseModel):
     dishid: Optional[int]
     count: Optional[int]
 
-
 class OrderedDishCreate(OrderedDishBase):
     pass
-
 
 class OrderedDish(OrderedDishBase):
     orderid: int
@@ -221,15 +183,12 @@ class OrderedDish(OrderedDishBase):
     class Config:
         orm_mode = True
 
-
 class OrderedDrinkBase(BaseModel):
     drinkid: Optional[int]
     count: Optional[int]
 
-
 class OrderedDrinkCreate(OrderedDrinkBase):
     pass
-
 
 class OrderedDrink(OrderedDrinkBase):
     orderid: int
