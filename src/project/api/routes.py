@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException, status
 
-from project.schemas.user import ClientCreate, Client, DrinkCreate, Drink
+from project.schemas.user import ClientCreate, Client, DrinkCreate, Drink, PriceCreate, Price
 from project.schemas.healthcheck import HealthCheckSchema
 from project.core.exceptions import UserNotFound, UserAlreadyExists, DrinkNotFound, DrinkAlreadyExists
-from project.api.depends import database, user_repo, drink_repo
+from project.core.exceptions import PriceNotFound, PriceAlreadyExists
+from project.api.depends import database, user_repo, drink_repo, price_repo
 
 
 router = APIRouter()
@@ -153,4 +154,77 @@ async def delete_drink(
             await drink_repo.delete_drink(session=session, drink_id=drink_id)
             await session.commit()
     except DrinkNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+
+
+
+# Price
+@router.get("/all_prices", response_model=list[Price], status_code=status.HTTP_200_OK)
+async def get_all_prices() -> list[Price]:
+    async with database.session() as session:
+        all_prices = await price_repo.get_all_prices(session=session)
+    return all_prices
+
+
+@router.get("/price/{dish_id}", response_model=Price, status_code=status.HTTP_200_OK)
+async def get_price_by_dish_id(
+    dish_id: int,
+) -> Price:
+    try:
+        async with database.session() as session:
+            price = await price_repo.get_price_by_dish_id(session=session, dish_id=dish_id)
+    except PriceNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    return price
+
+
+@router.post("/add_price/{dish_id}", response_model=Price, status_code=status.HTTP_201_CREATED)
+async def add_price(
+    dish_id: int,
+    price_dto: PriceCreate,
+) -> Price:
+    try:
+        async with database.session() as session:
+            new_price = await price_repo.create_price(
+                session=session,
+                price=price_dto,
+                dish_id=dish_id
+            )
+            await session.commit()
+    except PriceAlreadyExists as error:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
+    return new_price
+
+
+@router.put(
+    "/update_price/{dish_id}",
+    response_model=Price,
+    status_code=status.HTTP_200_OK,
+)
+async def update_price(
+    dish_id: int,
+    price_dto: PriceCreate,
+) -> Price:
+    try:
+        async with database.session() as session:
+            updated_price = await price_repo.update_price(
+                session=session,
+                dish_id=dish_id,
+                price=price_dto,
+            )
+            await session.commit()
+    except PriceNotFound as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
+    return updated_price
+
+
+@router.delete("/delete_price/{dish_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_price(
+    dish_id: int,
+) -> None:
+    try:
+        async with database.session() as session:
+            await price_repo.delete_price(session=session, dish_id=dish_id)
+            await session.commit()
+    except PriceNotFound as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
