@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 
-from project.schemas.user import ClientCreate, Client, DrinkCreate, Drink, PriceCreate, Price
+from project.schemas.user import ClientCreate, ClientSchema, DrinkCreate, DrinkSchema, PriceCreate, PriceSchema
 from project.schemas.healthcheck import HealthCheckSchema
 from project.core.exceptions import UserNotFound, UserAlreadyExists, DrinkNotFound, DrinkAlreadyExists
 from project.core.exceptions import PriceNotFound, PriceAlreadyExists
@@ -20,18 +20,18 @@ async def check_health() -> HealthCheckSchema:
     )
 
 # Client
-@router.get("/all_users", response_model=list[Client], status_code=status.HTTP_200_OK)
-async def get_all_users() -> list[Client]:
+@router.get("/all_users", response_model=list[ClientSchema], status_code=status.HTTP_200_OK)
+async def get_all_users() -> list[ClientSchema]:
     async with database.session() as session:
         all_users = await user_repo.get_all_users(session=session)
 
     return all_users
 
 
-@router.get("/user/{user_id}", response_model=Client, status_code=status.HTTP_200_OK)
+@router.get("/user/{user_id}", response_model=ClientSchema, status_code=status.HTTP_200_OK)
 async def get_user_by_id(
     user_id: int,
-) -> Client:
+) -> ClientSchema:
     try:
         async with database.session() as session:
             user = await user_repo.get_user_by_id(session=session, user_id=user_id)
@@ -41,10 +41,10 @@ async def get_user_by_id(
     return user
 
 
-@router.post("/add_user", response_model=Client, status_code=status.HTTP_201_CREATED)
+@router.post("/add_user", response_model=ClientSchema, status_code=status.HTTP_201_CREATED)
 async def add_user(
     user_dto: ClientCreate,
-) -> Client:
+) -> ClientSchema:
     try:
         async with database.session() as session:
             new_user = await user_repo.create_user(session=session, user=user_dto)
@@ -56,13 +56,13 @@ async def add_user(
 
 @router.put(
     "/update_user/{user_id}",
-    response_model=Client,
+    response_model=ClientSchema,
     status_code=status.HTTP_200_OK,
 )
 async def update_user(
     user_id: int,
     user_dto: ClientCreate,
-) -> Client:
+) -> ClientSchema:
     try:
         async with database.session() as session:
             updated_user = await user_repo.update_user(
@@ -91,17 +91,17 @@ async def delete_user(
 
 # Drink
 
-@router.get("/all_drinks", response_model=list[Drink], status_code=status.HTTP_200_OK)
-async def get_all_drinks() -> list[Drink]:
+@router.get("/all_drinks", response_model=list[DrinkSchema], status_code=status.HTTP_200_OK)
+async def get_all_drinks() -> list[DrinkSchema]:
     async with database.session() as session:
         all_drinks = await drink_repo.get_all_drinks(session=session)
     return all_drinks
 
 
-@router.get("/drink/{drink_id}", response_model=Drink, status_code=status.HTTP_200_OK)
+@router.get("/drink/{drink_id}", response_model=DrinkSchema, status_code=status.HTTP_200_OK)
 async def get_drink_by_id(
     drink_id: int,
-) -> Drink:
+) -> DrinkSchema:
     try:
         async with database.session() as session:
             drink = await drink_repo.get_drink_by_id(session=session, drink_id=drink_id)
@@ -110,10 +110,10 @@ async def get_drink_by_id(
     return drink
 
 
-@router.post("/add_drink", response_model=Drink, status_code=status.HTTP_201_CREATED)
+@router.post("/add_drink", response_model=DrinkSchema, status_code=status.HTTP_201_CREATED)
 async def add_drink(
     drink_dto: DrinkCreate,
-) -> Drink:
+) -> DrinkSchema:
     try:
         async with database.session() as session:
             new_drink = await drink_repo.create_drink(session=session, drink=drink_dto)
@@ -125,13 +125,13 @@ async def add_drink(
 
 @router.put(
     "/update_drink/{drink_id}",
-    response_model=Drink,
+    response_model=DrinkSchema,
     status_code=status.HTTP_200_OK,
 )
 async def update_drink(
     drink_id: int,
     drink_dto: DrinkCreate,
-) -> Drink:
+) -> DrinkSchema:
     try:
         async with database.session() as session:
             updated_drink = await drink_repo.update_drink(
@@ -159,17 +159,17 @@ async def delete_drink(
 
 
 # Price
-@router.get("/all_prices", response_model=list[Price], status_code=status.HTTP_200_OK)
-async def get_all_prices() -> list[Price]:
+@router.get("/all_prices", response_model=list[PriceSchema], status_code=status.HTTP_200_OK)
+async def get_all_prices() -> list[PriceSchema]:
     async with database.session() as session:
         all_prices = await price_repo.get_all_prices(session=session)
     return all_prices
 
 
-@router.get("/price/{dish_id}", response_model=Price, status_code=status.HTTP_200_OK)
+@router.get("/price/{dish_id}", response_model=PriceSchema, status_code=status.HTTP_200_OK)
 async def get_price_by_dish_id(
     dish_id: int,
-) -> Price:
+) -> PriceSchema:
     try:
         async with database.session() as session:
             price = await price_repo.get_price_by_dish_id(session=session, dish_id=dish_id)
@@ -178,11 +178,11 @@ async def get_price_by_dish_id(
     return price
 
 
-@router.post("/add_price/{dish_id}", response_model=Price, status_code=status.HTTP_201_CREATED)
+@router.post("/add_price/{dish_id}", response_model=PriceSchema, status_code=status.HTTP_201_CREATED)
 async def add_price(
     dish_id: int,
     price_dto: PriceCreate,
-) -> Price:
+) -> PriceSchema:
     try:
         async with database.session() as session:
             new_price = await price_repo.create_price(
@@ -198,13 +198,13 @@ async def add_price(
 
 @router.put(
     "/update_price/{dish_id}",
-    response_model=Price,
+    response_model=PriceSchema,
     status_code=status.HTTP_200_OK,
 )
 async def update_price(
     dish_id: int,
     price_dto: PriceCreate,
-) -> Price:
+) -> PriceSchema:
     try:
         async with database.session() as session:
             updated_price = await price_repo.update_price(

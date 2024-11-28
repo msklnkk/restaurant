@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
 from typing import Optional
 from decimal import Decimal
@@ -12,11 +12,10 @@ class ClientBase(BaseModel):
 class ClientCreate(ClientBase):
     pass
 
-class Client(ClientBase):
+class ClientSchema(ClientBase):
     clientid: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class DrinkBase(BaseModel):
     name: Optional[str]
@@ -24,11 +23,10 @@ class DrinkBase(BaseModel):
 class DrinkCreate(DrinkBase):
     pass
 
-class Drink(DrinkBase):
+class DrinkSchema(DrinkBase):
     drinkid: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class PriceBase(BaseModel):
     count: Optional[int]
@@ -37,11 +35,10 @@ class PriceBase(BaseModel):
 class PriceCreate(PriceBase):
     pass
 
-class Price(PriceBase):
+class PriceSchema(PriceBase):
     dishid: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ProductBase(BaseModel):
     name: Optional[str]
@@ -49,11 +46,10 @@ class ProductBase(BaseModel):
 class ProductCreate(ProductBase):
     pass
 
-class Product(ProductBase):
+class ProductSchema(ProductBase):
     productid: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class StaffBase(BaseModel):
     name: Optional[str]
@@ -65,11 +61,10 @@ class StaffBase(BaseModel):
 class StaffCreate(StaffBase):
     pass
 
-class Staff(StaffBase):
+class StaffSchema(StaffBase):
     staffid: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class SupplierBase(BaseModel):
     name: Optional[str]
@@ -79,11 +74,10 @@ class SupplierBase(BaseModel):
 class SupplierCreate(SupplierBase):
     pass
 
-class Supplier(SupplierBase):
+class SupplierSchema(SupplierBase):
     supplierid: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class TableBase(BaseModel):
     capacity: Optional[int]
@@ -92,11 +86,10 @@ class TableBase(BaseModel):
 class TableCreate(TableBase):
     pass
 
-class Table(TableBase):
+class TableSchema(TableBase):
     tableid: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class DeliveryBase(BaseModel):
     datedelivery: Optional[date]
@@ -104,11 +97,10 @@ class DeliveryBase(BaseModel):
 class DeliveryCreate(DeliveryBase):
     pass
 
-class Delivery(DeliveryBase):
+class DeliverySchema(DeliveryBase):
     deliveryid: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class DishBase(BaseModel):
     name: Optional[str]
@@ -118,11 +110,10 @@ class DishBase(BaseModel):
 class DishCreate(DishBase):
     pass
 
-class Dish(DishBase):
+class DishSchema(DishBase):
     dishid: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class OrderBase(BaseModel):
     tableid: Optional[int]
@@ -136,11 +127,10 @@ class OrderBase(BaseModel):
 class OrderCreate(OrderBase):
     pass
 
-class Order(OrderBase):
+class OrderSchema(OrderBase):
     orderid: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ProductInDeliveryBase(BaseModel):
     count: Optional[int]
@@ -150,12 +140,11 @@ class ProductInDeliveryCreate(ProductInDeliveryBase):
     productid: int
     deliveryid: int
 
-class ProductInDelivery(ProductInDeliveryBase):
+class ProductInDeliverySchema(ProductInDeliveryBase):
     productid: int
     deliveryid: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ShelfLifeBase(BaseModel):
     expirationdate: Optional[date]
@@ -164,11 +153,10 @@ class ShelfLifeBase(BaseModel):
 class ShelfLifeCreate(ShelfLifeBase):
     pass
 
-class ShelfLife(ShelfLifeBase):
+class ShelfLifeSchema(ShelfLifeBase):
     shelflifeid: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class OrderedDishBase(BaseModel):
     dishid: Optional[int]
@@ -177,11 +165,10 @@ class OrderedDishBase(BaseModel):
 class OrderedDishCreate(OrderedDishBase):
     pass
 
-class OrderedDish(OrderedDishBase):
+class OrderedDishSchema(OrderedDishBase):
     orderid: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 class OrderedDrinkBase(BaseModel):
     drinkid: Optional[int]
@@ -190,8 +177,7 @@ class OrderedDrinkBase(BaseModel):
 class OrderedDrinkCreate(OrderedDrinkBase):
     pass
 
-class OrderedDrink(OrderedDrinkBase):
+class OrderedDrinkSchema(OrderedDrinkBase):
     orderid: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
