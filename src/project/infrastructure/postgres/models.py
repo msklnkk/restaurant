@@ -1,152 +1,162 @@
-from sqlalchemy import Column, Integer, String, Date, Numeric, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, Date, Numeric, ForeignKey, Identity, ForeignKeyConstraint
+from sqlalchemy.orm import Mapped, mapped_column
+from datetime import date
+from decimal import Decimal
 from project.infrastructure.postgres.database import Base
 
 
 class Client(Base):
     __tablename__ = "clients"
 
-    clientid = Column(Integer, primary_key=True)
-    name = Column(String)
-    phone_number = Column(String)
-    mail = Column(String)
-    discount_percentage = Column(Integer)
+    clientid: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(nullable=True)
+    phone_number: Mapped[str] = mapped_column(nullable=True)
+    mail: Mapped[str] = mapped_column(nullable=True)
+    discount_percentage: Mapped[int] = mapped_column(nullable=True)
 
-    orders = relationship("Order", back_populates="client")
 
 class Drink(Base):
     __tablename__ = "drinks"
 
-    drinkid = Column(Integer, primary_key=True)
-    name = Column(String)
+    drinkid: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(nullable=True)
 
-    ordered_drinks = relationship("OrderedDrink", back_populates="drink")
 
 class Price(Base):
     __tablename__ = "prices"
+    priceid: Mapped[int] = mapped_column(primary_key=True)
+    dishid: Mapped[int] = mapped_column(ForeignKey("dishes.dishid"))
+    price: Mapped[Decimal] = mapped_column(nullable=True)
+    valid_from: Mapped[date] = mapped_column(nullable=True)
+    valid_to: Mapped[date] = mapped_column(nullable=True)
+    price_type: Mapped[str] = mapped_column(nullable=True)  # regular, business_lunch, etc.
 
-    dishid = Column(Integer, primary_key=True)
-    count = Column(Integer)
-    price = Column(Numeric)
-
-    dish = relationship("Dish", back_populates="price")
 
 class Product(Base):
     __tablename__ = "products"
 
-    productid = Column(Integer, primary_key=True)
-    name = Column(String)
+    productid: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(nullable=True)
 
-    dishes = relationship("Dish", back_populates="product")
-    product_deliveries = relationship("ProductInDelivery", back_populates="product")
 
 class Staff(Base):
     __tablename__ = "staff"
 
-    staffid = Column(Integer, primary_key=True)
-    name = Column(String)
-    job_title = Column(String)
-    date_of_hire = Column(Date)
-    salary = Column(Numeric)
-    contact_info = Column(Integer)
+    staffid: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(nullable=True)
+    job_title: Mapped[str] = mapped_column(nullable=True)
+    date_of_hire: Mapped[date] = mapped_column(nullable=True)
+    salary: Mapped[Decimal] = mapped_column(nullable=True)
+    contact_info: Mapped[str] = mapped_column(nullable=True)
 
-    orders = relationship("Order", back_populates="staff")
 
 class Supplier(Base):
     __tablename__ = "suppliers"
 
-    supplierid = Column(Integer, primary_key=True)
-    name = Column(String)
-    contact_info = Column(String)
-    address = Column(String)
+    supplierid: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(nullable=True)
+    contact_info: Mapped[str] = mapped_column(nullable=True)
+    address: Mapped[str] = mapped_column(nullable=True)
 
-    deliveries = relationship("Delivery", back_populates="supplier")
 
 class Table(Base):
     __tablename__ = "tables"
 
-    tableid = Column(Integer, primary_key=True)
-    capacity = Column(Integer)
-    location = Column(String)
+    tableid: Mapped[int] = mapped_column(primary_key=True)
+    capacity: Mapped[int] = mapped_column(nullable=True)
+    location: Mapped[str] = mapped_column(nullable=True)
 
-    orders = relationship("Order", back_populates="table")
 
 class Delivery(Base):
     __tablename__ = "delivery"
 
-    deliveryid = Column(Integer, ForeignKey('suppliers.supplierid'), primary_key=True)
-    datedelivery = Column(Date)
+    deliveryid: Mapped[int] = mapped_column(ForeignKey("suppliers.supplierid"), primary_key=True)
+    datedelivery: Mapped[date] = mapped_column(nullable=True)
 
-    supplier = relationship("Supplier", back_populates="deliveries")
-    product_deliveries = relationship("ProductInDelivery", back_populates="delivery")
+
+class DishProducts(Base):
+    __tablename__ = "dish_products"
+    dishid: Mapped[int] = mapped_column(ForeignKey("dishes.dishid"), primary_key=True)
+    productid: Mapped[int] = mapped_column(ForeignKey("products.productid"), primary_key=True)
+    quantity: Mapped[int] = mapped_column(nullable=True)  # количество продукта в блюде
+
 
 class Dish(Base):
     __tablename__ = "dishes"
+    dishid: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(nullable=True)
+    type: Mapped[str] = mapped_column(nullable=True)
+    recipe: Mapped[str] = mapped_column(nullable=True)
 
-    dishid = Column(Integer, primary_key=True)
-    name = Column(String)
-    type = Column(String)
-    recipe = Column(String)
-
-    price = relationship("Price", back_populates="dish", uselist=False)
-    product = relationship("Product", back_populates="dishes")
-    ordered_dishes = relationship("OrderedDish", back_populates="dish")
 
 class Order(Base):
     __tablename__ = "orders"
 
-    orderid = Column(Integer, primary_key=True)
-    tableid = Column(Integer, ForeignKey('tables.tableid'))
-    order_date = Column(Date)
-    total_sum = Column(Numeric)
-    status = Column(String)
-    staffid = Column(Integer, ForeignKey('staff.staffid'))
-    clientid = Column(Integer, ForeignKey('clients.clientid'))
-    payment_method = Column(String)
+    orderid: Mapped[int] = mapped_column(primary_key=True)
+    tableid: Mapped[int] = mapped_column(ForeignKey("tables.tableid"), nullable=True)
+    order_date: Mapped[date] = mapped_column(nullable=True)
+    total_sum: Mapped[Decimal] = mapped_column(nullable=True)
+    status: Mapped[str] = mapped_column(nullable=True)
+    staffid: Mapped[int] = mapped_column(ForeignKey("staff.staffid"), nullable=True)
+    clientid: Mapped[int] = mapped_column(ForeignKey("clients.clientid"), nullable=True)
+    payment_method: Mapped[str] = mapped_column(nullable=True)
 
-    table = relationship("Table", back_populates="orders")
-    staff = relationship("Staff", back_populates="orders")
-    client = relationship("Client", back_populates="orders")
-    ordered_dishes = relationship("OrderedDish", back_populates="order")
-    ordered_drinks = relationship("OrderedDrink", back_populates="order")
 
 class ProductInDelivery(Base):
     __tablename__ = "product_in_delivery"
 
-    productid = Column(Integer, ForeignKey('products.productid'), primary_key=True)
-    deliveryid = Column(Integer, ForeignKey('delivery.deliveryid'), primary_key=True)
-    count = Column(Integer)
-    cost = Column(Numeric)
+    productid: Mapped[int] = mapped_column(ForeignKey("products.productid"), primary_key=True)
+    deliveryid: Mapped[int] = mapped_column(ForeignKey("delivery.deliveryid"), primary_key=True)
+    count: Mapped[int] = mapped_column(nullable=True)
+    cost: Mapped[Decimal] = mapped_column(nullable=True)
 
-    product = relationship("Product", back_populates="product_deliveries")
-    delivery = relationship("Delivery", back_populates="product_deliveries")
-    shelf_life = relationship("ShelfLife", back_populates="product_delivery")
 
 class ShelfLife(Base):
     __tablename__ = "shelf_life"
 
-    shelflifeid = Column(Integer, primary_key=True)
-    expirationdate = Column(Date)
-    deliveryID = Column(Integer, ForeignKey('delivery.deliveryid'))
+    shelflifeid: Mapped[int] = mapped_column(primary_key=True)
+    expirationdate: Mapped[date] = mapped_column(nullable=True)
+    deliveryID: Mapped[int] = mapped_column(nullable=True)
 
-    product_delivery = relationship("ProductInDelivery", back_populates="shelf_life")
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ['shelflifeid', 'deliveryID'],
+            ['product_in_delivery.productid', 'product_in_delivery.deliveryid']
+        ),
+    )
+
 
 class OrderedDish(Base):
     __tablename__ = "ordered_dishes"
+    orderid: Mapped[int] = mapped_column(ForeignKey("orders.orderid"), primary_key=True)
+    dishid: Mapped[int] = mapped_column(ForeignKey("dishes.dishid"), primary_key=True)
+    count: Mapped[int] = mapped_column(nullable=True)
 
-    orderid = Column(Integer, ForeignKey('orders.orderid'), primary_key=True)
-    dishid = Column(Integer, ForeignKey('dishes.dishid'))
-    count = Column(Integer)
-
-    order = relationship("Order", back_populates="ordered_dishes")
-    dish = relationship("Dish", back_populates="ordered_dishes")
 
 class OrderedDrink(Base):
     __tablename__ = "ordered_drinks"
+    orderid: Mapped[int] = mapped_column(ForeignKey("orders.orderid"), primary_key=True)
+    drinkid: Mapped[int] = mapped_column(ForeignKey("drinks.drinkid"), primary_key=True)
+    count: Mapped[int] = mapped_column(nullable=True)
 
-    orderid = Column(Integer, ForeignKey('orders.orderid'), primary_key=True)
-    drinkid = Column(Integer, ForeignKey('drinks.drinkid'))
+
+# Для бд
+class OrderCopy(Base):
+    __tablename__ = "orders_copy"
+
+    orderid = Column(Integer, Identity(always=True), primary_key=True)
+    tableid = Column(Integer)
+    order_date = Column(Date)
+    total_sum = Column(Numeric)
+    status = Column(String)
+    staffid = Column(Integer)
+    clientid = Column(Integer)
+    payment_method = Column(String)
+
+class OrderedDrinkCopy(Base):
+    __tablename__ = "ordered_drinks_copy"
+
+    id = Column(Integer, Identity(always=True), primary_key=True)
+    orderid = Column(Integer)
+    drinkid = Column(Integer)
     count = Column(Integer)
-
-    order = relationship("Order", back_populates="ordered_drinks")
-    drink = relationship("Drink", back_populates="ordered_drinks")

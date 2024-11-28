@@ -12,41 +12,95 @@ from project.core.exceptions import UserNotFound, UserAlreadyExists, DrinkNotFou
 from project.core.exceptions import PriceNotFound, PriceAlreadyExists
 
 class ClientRepository:
-    @staticmethod
-    def get_client(db: Session, client_id: int):
-        return db.query(Client).filter(Client.clientid == client_id).first()
+    _collection: Type[Client] = Client
 
-    @staticmethod
-    def get_clients(db: Session, skip: int = 0, limit: int = 100):
-        return db.query(Client).offset(skip).limit(limit).all()
+    async def check_connection(
+        self,
+        session: AsyncSession,
+    ) -> bool:
+        query = "select 1;"
 
-    @staticmethod
-    def create_client(db: Session, client: ClientCreate):
-        db_client = Client(**client.dict())
-        db.add(db_client)
-        db.commit()
-        db.refresh(db_client)
-        return db_client
+        result = await session.scalar(text(query))
 
-    @staticmethod
-    def update_client(db: Session, client_id: int, client: ClientCreate):
-        db_client = db.query(Client).filter(Client.clientid == client_id).first()
-        if db_client:
-            for key, value in client.dict().items():
-                setattr(db_client, key, value)
-            db.commit()
-            db.refresh(db_client)
-        return db_client
+        return True if result else False
 
-    @staticmethod
-    def delete_client(db: Session, client_id: int):
-        db_client = db.query(Client).filter(Client.clientid == client_id).first()
-        if db_client:
-            db.delete(db_client)
-            db.commit()
-            return True
-        return False
+    async def get_all_users(
+        self,
+        session: AsyncSession,
+    ) -> list[Client]:
+        query = select(self._collection)
 
+        users = await session.scalars(query)
+
+        return [Client.model_validate(obj=user) for user in users.all()]
+
+    async def get_user_by_id(
+        self,
+        session: AsyncSession,
+        user_id: int,
+    ) -> Client:
+        query = (
+            select(self._collection)
+            .where(self._collection.id == user_id)
+        )
+
+        user = await session.scalar(query)
+
+        if not user:
+            raise UserNotFound(_id=user_id)
+
+        return Client.model_validate(obj=user)
+
+    async def create_user(
+        self,
+        session: AsyncSession,
+        user: ClientCreate,
+    ) -> Client:
+        query = (
+            insert(self._collection)
+            .values(user.model_dump())
+            .returning(self._collection)
+        )
+
+        try:
+            created_user = await session.scalar(query)
+            await session.flush()
+        except IntegrityError:
+            raise UserAlreadyExists(email=user.email)
+
+        return Client.model_validate(obj=created_user)
+
+    async def update_user(
+        self,
+        session: AsyncSession,
+        user_id: int,
+        user: ClientCreate,
+    ) -> Client:
+        query = (
+            update(self._collection)
+            .where(self._collection.id == user_id)
+            .values(user.model_dump())
+            .returning(self._collection)
+        )
+
+        updated_user = await session.scalar(query)
+
+        if not updated_user:
+            raise UserNotFound(_id=user_id)
+
+        return Client.model_validate(obj=updated_user)
+
+    async def delete_user(
+        self,
+        session: AsyncSession,
+        user_id: int
+    ) -> None:
+        query = delete(self._collection).where(self._collection.id == user_id)
+
+        result = await session.execute(query)
+
+        if not result.rowcount:
+            raise UserNotFound(_id=user_id)
 
 class DrinkRepository:
     _collection: Type[Drink] = Drink
