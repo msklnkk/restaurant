@@ -181,3 +181,17 @@ class OrderedDrinkSchema(OrderedDrinkBase):
     orderid: int
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class DishProductsBase(BaseModel):
+    quantity: Optional[int]
+
+class DishProductsCreate(DishProductsBase):
+    dishid: int
+    productid: int
+
+class DishProductsSchema(DishProductsBase):
+    dishid: int
+    productid: int
+
+    model_config = ConfigDict(from_attributes=True)
