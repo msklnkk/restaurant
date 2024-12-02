@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Numeric, ForeignKey, Identity, ForeignKeyConstraint
+from sqlalchemy import ForeignKey, ForeignKeyConstraint, PrimaryKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import date
 from decimal import Decimal
@@ -111,14 +111,16 @@ class ProductInDelivery(Base):
     cost: Mapped[Decimal] = mapped_column(nullable=True)
 
 
+
 class ShelfLife(Base):
     __tablename__ = "shelf_life"
 
-    shelflifeid: Mapped[int] = mapped_column(primary_key=True)
+    shelflifeid: Mapped[int] = mapped_column()
     expirationdate: Mapped[date] = mapped_column(nullable=True)
     deliveryID: Mapped[int] = mapped_column(nullable=True)
 
     __table_args__ = (
+        PrimaryKeyConstraint('shelflifeid', 'deliveryID'),  # Составной первичный ключ
         ForeignKeyConstraint(
             ['shelflifeid', 'deliveryID'],
             ['product_in_delivery.productid', 'product_in_delivery.deliveryid']
@@ -138,25 +140,3 @@ class OrderedDrink(Base):
     orderid: Mapped[int] = mapped_column(ForeignKey("orders.orderid"), primary_key=True)
     drinkid: Mapped[int] = mapped_column(ForeignKey("drinks.drinkid"), primary_key=True)
     count: Mapped[int] = mapped_column(nullable=True)
-
-
-# Для бд
-class OrderCopy(Base):
-    __tablename__ = "orders_copy"
-
-    orderid = Column(Integer, Identity(always=True), primary_key=True)
-    tableid = Column(Integer)
-    order_date = Column(Date)
-    total_sum = Column(Numeric)
-    status = Column(String)
-    staffid = Column(Integer)
-    clientid = Column(Integer)
-    payment_method = Column(String)
-
-class OrderedDrinkCopy(Base):
-    __tablename__ = "ordered_drinks_copy"
-
-    id = Column(Integer, Identity(always=True), primary_key=True)
-    orderid = Column(Integer)
-    drinkid = Column(Integer)
-    count = Column(Integer)
