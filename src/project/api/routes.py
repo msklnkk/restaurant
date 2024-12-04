@@ -17,7 +17,7 @@ from project.core.exceptions import PriceNotFound, PriceAlreadyExists, DishProdu
 from project.core.exceptions import ProductInDeliveryNotFound, ProductInDeliveryAlreadyExists, ShelfLifeNotFound, ShelfLifeAlreadyExists
 from project.core.exceptions import OrderedDishNotFound, OrderedDishAlreadyExists, OrderedDrinkNotFound, OrderedDrinkAlreadyExists
 
-from project.api.depends import database, user_repo, drink_repo, price_repo, product_repo, staff_repo, supplier_repo, table_repo
+from project.api.depends import database, client_repo, drink_repo, price_repo, product_repo, staff_repo, supplier_repo, table_repo
 from project.api.depends import delivery_repo, dishProducts_repo, dish_repo, order_repo, productInDelivery_repo, shelfLife_repo
 from project.api.depends import orderedDish_repo, orderedDrink_repo
 
@@ -30,7 +30,7 @@ router = APIRouter()
 @router.get("/healthcheck", response_model=HealthCheckSchema, status_code=status.HTTP_200_OK)
 async def check_health() -> HealthCheckSchema:
     async with database.session() as session:
-        db_is_ok = await user_repo.check_connection(session=session)
+        db_is_ok = await client_repo.check_connection(session=session)
 
     return HealthCheckSchema(
         db_is_ok=db_is_ok,
@@ -40,7 +40,7 @@ async def check_health() -> HealthCheckSchema:
 @router.get("/all_users", response_model=list[ClientSchema], status_code=status.HTTP_200_OK)
 async def get_all_users() -> list[ClientSchema]:
     async with database.session() as session:
-        all_users = await user_repo.get_all_users(session=session)
+        all_users = await client_repo.get_all_users(session=session)
 
     return all_users
 
@@ -51,7 +51,7 @@ async def get_user_by_id(
 ) -> ClientSchema:
     try:
         async with database.session() as session:
-            user = await user_repo.get_user_by_id(session=session, user_id=user_id)
+            user = await client_repo.get_user_by_id(session=session, user_id=user_id)
     except UserNotFound as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
 
@@ -64,7 +64,7 @@ async def add_user(
 ) -> ClientSchema:
     try:
         async with database.session() as session:
-            new_user = await user_repo.create_user(session=session, user=user_dto)
+            new_user = await client_repo.create_user(session=session, user=user_dto)
     except UserAlreadyExists as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
 
@@ -82,7 +82,7 @@ async def update_user(
 ) -> ClientSchema:
     try:
         async with database.session() as session:
-            updated_user = await user_repo.update_user(
+            updated_user = await client_repo.update_user(
                 session=session,
                 user_id=user_id,
                 user=user_dto,
@@ -99,7 +99,7 @@ async def delete_user(
 ) -> None:
     try:
         async with database.session() as session:
-            user = await user_repo.delete_user(session=session, user_id=user_id)
+            user = await client_repo.delete_user(session=session, user_id=user_id)
     except UserNotFound as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
 

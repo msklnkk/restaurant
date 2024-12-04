@@ -1,12 +1,23 @@
-from project.infrastructure.postgres.repository.user_repo import ClientRepository, DrinkRepository, PriceRepository, ProductRepository
-from project.infrastructure.postgres.repository.user_repo import StaffRepository, SupplierRepository, TableRepository, DeliveryRepository
-from project.infrastructure.postgres.repository.user_repo import DishProductsRepository, DishRepository, OrderRepository, ProductInDeliveryRepository
-from project.infrastructure.postgres.repository.user_repo import ShelfLifeRepository, OrderedDishRepository, OrderedDrinkRepository
+from project.infrastructure.postgres.repository.client_repo import ClientRepository
+from project.infrastructure.postgres.repository.dish_repo import DishRepository
+from project.infrastructure.postgres.repository.order_repo import OrderRepository
+from project.infrastructure.postgres.repository.staff_repo import StaffRepository
+from project.infrastructure.postgres.repository.table_repo import TableRepository
+from project.infrastructure.postgres.repository.orderedDish_repo import OrderedDishRepository
+from project.infrastructure.postgres.repository.dishProducts_repo import DishProductsRepository
+from project.infrastructure.postgres.repository.delivery_repo import DeliveryRepository
+from project.infrastructure.postgres.repository.shelfLife_repo import ShelfLifeRepository
+from project.infrastructure.postgres.repository.orderedDrink_repo import OrderedDrinkRepository
+from project.infrastructure.postgres.repository.productInDelivery_repo import ProductInDeliveryRepository
+from project.infrastructure.postgres.repository.supplier_repo import SupplierRepository
+from project.infrastructure.postgres.repository.drink_repo import DrinkRepository
+from project.infrastructure.postgres.repository.price_repo import PriceRepository
+from project.infrastructure.postgres.repository.product_repo import ProductRepository
 
 from project.infrastructure.postgres.database import PostgresDatabase
 
 
-user_repo = ClientRepository()
+client_repo = ClientRepository()
 drink_repo = DrinkRepository()
 price_repo = PriceRepository()
 product_repo = ProductRepository()
