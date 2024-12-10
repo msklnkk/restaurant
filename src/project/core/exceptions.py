@@ -1,11 +1,12 @@
 from typing import Final
+from fastapi import HTTPException, status
 
 # Client
 class UserNotFound(BaseException):
     _ERROR_MESSAGE_TEMPLATE: Final[str] = "Клиент с id {id} не найден"
     message: str
 
-    def __init__(self, _id: int) -> None:
+    def __init__(self, _id: int | str) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(id=_id)
         super().__init__(self.message)
 
@@ -23,7 +24,7 @@ class DrinkNotFound(BaseException):
     _ERROR_MESSAGE_TEMPLATE: Final[str] = "Напиток с id {id} не найден"
     message: str
 
-    def __init__(self, _id: int) -> None:
+    def __init__(self, _id: int | str) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(id=_id)
         super().__init__(self.message)
 
@@ -41,9 +42,9 @@ class PriceNotFound(BaseException):
     _ERROR_MESSAGE_TEMPLATE: Final[str] = "Цена для блюда с id {id} не найдена"
     message: str
 
-    def __init__(self, _id: int) -> None:
+    def __init__(self, _id: int | str) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(id=_id)
-        super().init(self.message)
+        super().__init__(self.message)
 
 
 class PriceAlreadyExists(BaseException):
@@ -51,7 +52,7 @@ class PriceAlreadyExists(BaseException):
 
     def __init__(self, dish_id: int) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(dish_id=dish_id)
-        super().init(self.message)
+        super().__init__(self.message)
 
 
 
@@ -60,7 +61,7 @@ class ProductNotFound(BaseException):
     _ERROR_MESSAGE_TEMPLATE: Final[str] = "Продукт с id {id} не найден"
     message: str
 
-    def __init__(self, _id: int) -> None:
+    def __init__(self, _id: int | str) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(id=_id)
         super().__init__(self.message)
 
@@ -79,7 +80,7 @@ class StaffNotFound(BaseException):
     _ERROR_MESSAGE_TEMPLATE: Final[str] = "Сотрудник с id {id} не найден"
     message: str
 
-    def __init__(self, _id: int) -> None:
+    def __init__(self, _id: int | str) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(id=_id)
         super().__init__(self.message)
 
@@ -98,7 +99,7 @@ class SupplierNotFound(BaseException):
     _ERROR_MESSAGE_TEMPLATE: Final[str] = "Поставщик с id {id} не найден"
     message: str
 
-    def __init__(self, _id: int) -> None:
+    def __init__(self, _id: int | str) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(id=_id)
         super().__init__(self.message)
 
@@ -117,7 +118,7 @@ class TableNotFound(BaseException):
     _ERROR_MESSAGE_TEMPLATE: Final[str] = "Стол с id {id} не найден"
     message: str
 
-    def __init__(self, _id: int) -> None:
+    def __init__(self, _id: int | str) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(id=_id)
         super().__init__(self.message)
 
@@ -135,7 +136,7 @@ class DeliveryNotFound(BaseException):
     _ERROR_MESSAGE_TEMPLATE: Final[str] = "Доставка с id {id} не найдена"
     message: str
 
-    def __init__(self, _id: int) -> None:
+    def __init__(self, _id: int | str) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(id=_id)
         super().__init__(self.message)
 
@@ -153,7 +154,7 @@ class DishProductNotFound(BaseException):
     _ERROR_MESSAGE_TEMPLATE: Final[str] = "Связь блюда (id: {dish_id}) с продуктом (id: {product_id}) не найдена"
     message: str
 
-    def __init__(self, dish_id: int, product_id: int) -> None:
+    def __init__(self, dish_id: int | str, product_id: int | str) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(dish_id=dish_id, product_id=product_id)
         super().__init__(self.message)
 
@@ -171,7 +172,7 @@ class DishNotFound(BaseException):
     _ERROR_MESSAGE_TEMPLATE: Final[str] = "Блюдо с id {id} не найдено"
     message: str
 
-    def __init__(self, _id: int) -> None:
+    def __init__(self, _id: int | str) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(id=_id)
         super().__init__(self.message)
 
@@ -190,7 +191,7 @@ class OrderNotFound(BaseException):
     _ERROR_MESSAGE_TEMPLATE: Final[str] = "Заказ с id {id} не найден"
     message: str
 
-    def __init__(self, _id: int) -> None:
+    def __init__(self, _id: int | str) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(id=_id)
         super().__init__(self.message)
 
@@ -208,7 +209,7 @@ class ProductInDeliveryNotFound(BaseException):
     _ERROR_MESSAGE_TEMPLATE: Final[str] = "Продукт (id: {product_id}) в поставке (id: {delivery_id}) не найден"
     message: str
 
-    def __init__(self, product_id: int, delivery_id: int) -> None:
+    def __init__(self, product_id: int | str, delivery_id: int | str) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(product_id=product_id, delivery_id=delivery_id)
         super().__init__(self.message)
 
@@ -226,7 +227,7 @@ class ShelfLifeNotFound(BaseException):
     _ERROR_MESSAGE_TEMPLATE: Final[str] = "Срок годности (id: {shelf_id}) для поставки (id: {delivery_id}) не найден"
     message: str
 
-    def __init__(self, shelf_id: int, delivery_id: int) -> None:
+    def __init__(self, shelf_id: int | str, delivery_id: int | str) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(shelf_id=shelf_id, delivery_id=delivery_id)
         super().__init__(self.message)
 
@@ -244,7 +245,7 @@ class OrderedDishNotFound(BaseException):
     _ERROR_MESSAGE_TEMPLATE: Final[str] = "Блюдо (id: {dish_id}) в заказе (id: {order_id}) не найдено"
     message: str
 
-    def __init__(self, dish_id: int, order_id: int) -> None:
+    def __init__(self, dish_id: int | str, order_id: int | str) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(dish_id=dish_id, order_id=order_id)
         super().__init__(self.message)
 
@@ -262,7 +263,7 @@ class OrderedDrinkNotFound(BaseException):
     _ERROR_MESSAGE_TEMPLATE: Final[str] = "Напиток (id: {drink_id}) в заказе (id: {order_id}) не найден"
     message: str
 
-    def __init__(self, drink_id: int, order_id: int) -> None:
+    def __init__(self, drink_id: int | str, order_id: int | str) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(drink_id=drink_id, order_id=order_id)
         super().__init__(self.message)
 
@@ -273,3 +274,22 @@ class OrderedDrinkAlreadyExists(BaseException):
     def __init__(self, drink_id: int, order_id: int) -> None:
         self.message = self._ERROR_MESSAGE_TEMPLATE.format(drink_id=drink_id, order_id=order_id)
         super().__init__(self.message)
+
+
+
+
+
+
+class DatabaseError(BaseException):
+    _ERROR_MESSAGE_TEMPLATE: Final[str] = "Произошла ошибка в базе данных: {message}"
+    def __init__(self, message: str) -> None:
+        self.message = self._ERROR_MESSAGE_TEMPLATE.format(message=message)
+        super().__init__(self.message)
+class CredentialsException(HTTPException):
+    def __init__(self, detail: str) -> None:
+        self.detail = detail
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=detail,
+            headers={"WWW-Authenticate": "Bearer"},
+        )

@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, ForeignKeyConstraint, PrimaryKeyConstraint
+from sqlalchemy import ForeignKey, ForeignKeyConstraint, PrimaryKeyConstraint, false
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import date
 from decimal import Decimal
@@ -13,6 +13,7 @@ class Client(Base):
     phone_number: Mapped[str] = mapped_column(nullable=True)
     mail: Mapped[str] = mapped_column(nullable=True)
     discount_percentage: Mapped[int] = mapped_column(nullable=True)
+    is_admin: Mapped[bool] = mapped_column(default=False, server_default=false())
 
 
 class Drink(Base):

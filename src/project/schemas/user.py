@@ -1,12 +1,12 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from datetime import date
 from typing import Optional
 from decimal import Decimal
 
 class ClientBase(BaseModel):
     name: Optional[str]
-    phone_number: Optional[str]
-    mail: Optional[str]
+    phone_number: str | None = Field(default=None, pattern=r"^\+?7\d{10}$", examples=["+79999999999"])
+    mail: str = Field(pattern=r"^\S+@\S+\.\S+$", examples=["email@mail.ru"])
     discount_percentage: Optional[int]
 
 class ClientCreate(ClientBase):
