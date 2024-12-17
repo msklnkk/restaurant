@@ -12,10 +12,10 @@ class UserNotFound(BaseException):
 
 
 class UserAlreadyExists(BaseException):
-    _ERROR_MESSAGE_TEMPLATE: Final[str] = "Клиент с почтой '{email}' уже существует"
+    _ERROR_MESSAGE_TEMPLATE: Final[str] = "Клиент с почтой '{mail}' уже существует"
 
-    def __init__(self, email: str) -> None:
-        self.message = self._ERROR_MESSAGE_TEMPLATE.format(email=email)
+    def __init__(self, mail: str) -> None:
+        self.message = self._ERROR_MESSAGE_TEMPLATE.format(mail=mail)
         super().__init__(self.message)
 
 

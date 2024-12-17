@@ -14,7 +14,7 @@ class Client(Base):
     mail: Mapped[str] = mapped_column(nullable=True)
     discount_percentage: Mapped[int] = mapped_column(nullable=True)
     is_admin: Mapped[bool] = mapped_column(default=False, server_default=false())
-
+    password: Mapped[str] = mapped_column(nullable=False)
 
 class Drink(Base):
     __tablename__ = "drinks"
@@ -118,7 +118,7 @@ class ShelfLife(Base):
 
     shelflifeid: Mapped[int] = mapped_column()
     expirationdate: Mapped[date] = mapped_column(nullable=True)
-    deliveryID: Mapped[int] = mapped_column(nullable=True)
+    deliveryID: Mapped[int] = mapped_column(nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint('shelflifeid', 'deliveryID'),  # Составной первичный ключ

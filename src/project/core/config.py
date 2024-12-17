@@ -3,21 +3,21 @@ from pydantic import SecretStr
 
 
 class Settings(BaseSettings):
-    ORIGINS: str
-    ROOT_PATH: str
-    ENV: str
-    LOG_LEVEL: str
+    ORIGINS: str = ''
+    ROOT_PATH: str = ''
+    ENV: str = ''
+    LOG_LEVEL: str = ''
 
-    POSTGRES_SCHEMA: str
-    POSTGRES_HOST: str
-    POSTGRES_DB: str
-    POSTGRES_PORT: int
-    POSTGRES_USER: SecretStr
-    POSTGRES_PASSWORD: SecretStr
-    POSTGRES_RECONNECT_INTERVAL_SEC: int
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
-    SECRET_AUTH_KEY: SecretStr
-    AUTH_ALGORITHM: str
+    POSTGRES_SCHEMA: str = 'my_app_schema'
+    POSTGRES_HOST: str = 'localhost'
+    POSTGRES_DB: str = 'postgres'
+    POSTGRES_PORT: int = 5432
+    POSTGRES_USER: SecretStr = 'postgres'
+    POSTGRES_PASSWORD: SecretStr = 'postgres'
+    POSTGRES_RECONNECT_INTERVAL_SEC: int = 1
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    SECRET_AUTH_KEY: SecretStr = ''
+    AUTH_ALGORITHM: str = ''
 
     @property
     def postgres_url(self) -> str:

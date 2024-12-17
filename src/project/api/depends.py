@@ -55,16 +55,16 @@ async def get_current_client(
             key=settings.SECRET_AUTH_KEY.get_secret_value(),
             algorithms=[settings.AUTH_ALGORITHM],
         )
-        name: str = payload.get("sub")
-        if name is None:
+        email: str = payload.get("sub")
+        if email is None:
             raise CredentialsException(detail=AUTH_EXCEPTION_MESSAGE)
-        token_data = TokenData(name=name)
+        token_data = TokenData(username=email)
     except JWTError:
         raise CredentialsException(detail=AUTH_EXCEPTION_MESSAGE)
     async with database.session() as session:
         client = await client_repo.get_user_by_mail(
             session=session,
-            mail=token_data.name,
+            mail=token_data.username,
         )
     if client is None:
         raise CredentialsException(detail=AUTH_EXCEPTION_MESSAGE)

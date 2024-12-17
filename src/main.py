@@ -47,6 +47,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+
     app.include_router(client_router, tags=["Client"])
     app.include_router(delivery_router, tags=["Delivery"])
     app.include_router(dish_products_router, tags=["Dish Product"])
@@ -66,3 +67,22 @@ def create_app() -> FastAPI:
     app.include_router(healthcheck_router, tags=["Health check"])
 
     return app
+
+
+app = create_app()
+
+
+async def run() -> None:
+    config = uvicorn.Config("main:app", host="0.0.0.0", port=8000, reload=False)
+    server = uvicorn.Server(config=config)
+    tasks = (
+        asyncio.create_task(server.serve()),
+    )
+
+    await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+
+
+if __name__ == "__main__":
+    logger.debug(f"{settings.postgres_url}=")
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(run())

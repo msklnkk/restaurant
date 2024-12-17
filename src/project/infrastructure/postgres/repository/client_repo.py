@@ -79,7 +79,7 @@ class ClientRepository:
             created_user = await session.scalar(query)
             await session.flush()
         except IntegrityError:
-            raise UserAlreadyExists(email=user.email)
+            raise UserAlreadyExists(mail=user.mail)
 
         return ClientSchema.model_validate(obj=created_user)
 

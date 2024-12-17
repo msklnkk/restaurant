@@ -48,11 +48,11 @@ async def add_user(
     user_dto: ClientCreate,
     current_client: ClientSchema = Depends(get_current_client),
 ) -> ClientSchema:
-    check_for_admin_access(client=current_client)
+    check_for_admin_access(user=current_client)
     try:
         async with database.session() as session:
             user_dto.password = get_password_hash(password=user_dto.password)
-            new_user = await client_repo.create_user(session=session, client=user_dto)
+            new_user = await client_repo.create_user(session=session, user=user_dto)
     except UserAlreadyExists as error:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=error.message)
 
@@ -69,14 +69,14 @@ async def update_user(
     user_dto: ClientCreate,
     current_client: ClientSchema = Depends(get_current_client),
 ) -> ClientSchema:
-    check_for_admin_access(client=current_client)
+    check_for_admin_access(user=current_client)
     try:
         async with database.session() as session:
             user_dto.password = get_password_hash(password=user_dto.password)
             updated_user = await client_repo.update_user(
                 session=session,
                 user_id=user_id,
-                client=user_dto,
+                user=user_dto,
             )
     except UserNotFound as error:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
@@ -92,7 +92,7 @@ async def delete_user(
     user_id: int,
     current_client: ClientSchema = Depends(get_current_client),
 ) -> None:
-    check_for_admin_access(client=current_client)
+    check_for_admin_access(user=current_client)
     try:
         async with database.session() as session:
             user = await client_repo.delete_user(session=session, user_id=user_id)

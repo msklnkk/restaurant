@@ -6,8 +6,10 @@ from decimal import Decimal
 class ClientBase(BaseModel):
     name: Optional[str]
     phone_number: str | None = Field(default=None, pattern=r"^\+?7\d{10}$", examples=["+79999999999"])
-    mail: str = Field(pattern=r"^\S+@\S+\.\S+$", examples=["email@mail.ru"])
+    mail: str = Field(pattern=r"^\S+@\S+\.\S+$", examples=["mail@mail.ru"])
+    is_admin: bool = False
     discount_percentage: Optional[int]
+    password: str
 
 class ClientCreate(ClientBase):
     pass
