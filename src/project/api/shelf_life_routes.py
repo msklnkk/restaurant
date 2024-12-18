@@ -1,14 +1,19 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from datetime import date
 
-from project.schemas.user import ShelfLifeCreate, ShelfLifeSchema
+from project.schemas.user import ShelfLifeCreate, ShelfLifeSchema, ClientSchema
 from project.core.exceptions import ShelfLifeNotFound, ShelfLifeAlreadyExists
-from project.api.depends import database, shelfLife_repo
+from project.api.depends import database, shelfLife_repo, check_for_admin_access, get_current_client
 
 shelf_life_router = APIRouter()
 
 
-@shelf_life_router.get("/all", response_model=list[ShelfLifeSchema], status_code=status.HTTP_200_OK)
+@shelf_life_router.get(
+    "/all",
+    response_model=list[ShelfLifeSchema],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_all_shelf_lives() -> list[ShelfLifeSchema]:
     async with database.session() as session:
         all_shelf_lives = await shelfLife_repo.get_all_shelf_lives(session=session)
@@ -16,7 +21,12 @@ async def get_all_shelf_lives() -> list[ShelfLifeSchema]:
     return all_shelf_lives
 
 
-@shelf_life_router.get("/shelf/{shelf_id}/delivery/{delivery_id}", response_model=ShelfLifeSchema, status_code=status.HTTP_200_OK)
+@shelf_life_router.get(
+    "/shelf/{shelf_id}/delivery/{delivery_id}",
+    response_model=ShelfLifeSchema,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_shelf_life(
     shelf_id: int,
     delivery_id: int,
@@ -34,7 +44,12 @@ async def get_shelf_life(
     return shelf_life
 
 
-@shelf_life_router.get("/delivery/{delivery_id}", response_model=list[ShelfLifeSchema], status_code=status.HTTP_200_OK)
+@shelf_life_router.get(
+    "/delivery/{delivery_id}",
+    response_model=list[ShelfLifeSchema],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_shelf_lives_by_delivery(
     delivery_id: int,
 ) -> list[ShelfLifeSchema]:
@@ -50,7 +65,9 @@ async def get_shelf_lives_by_delivery(
 @shelf_life_router.post("/add", response_model=ShelfLifeSchema, status_code=status.HTTP_201_CREATED)
 async def add_shelf_life(
     shelf_life_dto: ShelfLifeCreate,
+current_client: ClientSchema = Depends(get_current_client),
 ) -> ShelfLifeSchema:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             new_shelf_life = await shelfLife_repo.create_shelf_life(
@@ -72,7 +89,9 @@ async def update_shelf_life(
     shelf_id: int,
     delivery_id: int,
     shelf_life_dto: ShelfLifeCreate,
+current_client: ClientSchema = Depends(get_current_client),
 ) -> ShelfLifeSchema:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             updated_shelf_life = await shelfLife_repo.update_shelf_life(
@@ -91,7 +110,9 @@ async def update_shelf_life(
 async def delete_shelf_life(
     shelf_id: int,
     delivery_id: int,
+current_client: ClientSchema = Depends(get_current_client),
 ) -> None:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             await shelfLife_repo.delete_shelf_life(
@@ -103,7 +124,12 @@ async def delete_shelf_life(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
 
 
-@shelf_life_router.get("/expired", response_model=list[ShelfLifeSchema], status_code=status.HTTP_200_OK)
+@shelf_life_router.get(
+    "/expired",
+    response_model=list[ShelfLifeSchema],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_expired_shelf_lives(
         current_date: date | None = None
 ) -> list[ShelfLifeSchema]:
@@ -119,7 +145,9 @@ async def get_expired_shelf_lives(
 @shelf_life_router.delete("/delivery/{delivery_id}/delete_all", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_shelf_lives_by_delivery(
         delivery_id: int,
+current_client: ClientSchema = Depends(get_current_client),
 ) -> None:
+    check_for_admin_access(client=current_client)
     async with database.session() as session:
         await shelfLife_repo.delete_shelf_lives_by_delivery(
             session=session,

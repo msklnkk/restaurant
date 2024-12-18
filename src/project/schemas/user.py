@@ -4,12 +4,12 @@ from typing import Optional
 from decimal import Decimal
 
 class ClientBase(BaseModel):
-    name: Optional[str]
+    name: str
     phone_number: str | None = Field(default=None, pattern=r"^\+?7\d{10}$", examples=["+79999999999"])
     mail: str = Field(pattern=r"^\S+@\S+\.\S+$", examples=["mail@mail.ru"])
     is_admin: bool = False
-    discount_percentage: Optional[int]
-    password: str
+    discount_percentage: int = 0
+    password: str = Field(min_length=6)
 
 class ClientCreate(ClientBase):
     pass
@@ -95,13 +95,12 @@ class TableSchema(TableBase):
 
 class DeliveryBase(BaseModel):
     datedelivery: Optional[date]
+    deliveryid: int
 
 class DeliveryCreate(DeliveryBase):
     pass
 
 class DeliverySchema(DeliveryBase):
-    deliveryid: int
-
     model_config = ConfigDict(from_attributes=True)
 
 class DishBase(BaseModel):

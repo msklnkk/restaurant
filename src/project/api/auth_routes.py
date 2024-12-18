@@ -62,6 +62,7 @@ async def register_client(
             detail="Внутренняя ошибка сервера при регистрации"
         )
 
+
 @auth_router.post("/token")
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],

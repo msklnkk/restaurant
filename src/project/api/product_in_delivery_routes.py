@@ -1,14 +1,19 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from decimal import Decimal
 
-from project.schemas.user import ProductInDeliveryCreate, ProductInDeliverySchema
+from project.schemas.user import ProductInDeliveryCreate, ProductInDeliverySchema, ClientSchema
 from project.core.exceptions import ProductInDeliveryNotFound, ProductInDeliveryAlreadyExists
-from project.api.depends import database, productInDelivery_repo
+from project.api.depends import database, productInDelivery_repo, check_for_admin_access, get_current_client
 
 product_in_delivery_router = APIRouter()
 
 
-@product_in_delivery_router.get("/all", response_model=list[ProductInDeliverySchema], status_code=status.HTTP_200_OK)
+@product_in_delivery_router.get(
+    "/all",
+    response_model=list[ProductInDeliverySchema],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_all_products_in_deliveries() -> list[ProductInDeliverySchema]:
     async with database.session() as session:
         all_products = await productInDelivery_repo.get_all_products_in_deliveries(session=session)
@@ -16,7 +21,12 @@ async def get_all_products_in_deliveries() -> list[ProductInDeliverySchema]:
     return all_products
 
 
-@product_in_delivery_router.get("/product/{product_id}/delivery/{delivery_id}", response_model=ProductInDeliverySchema, status_code=status.HTTP_200_OK)
+@product_in_delivery_router.get(
+    "/product/{product_id}/delivery/{delivery_id}",
+    response_model=ProductInDeliverySchema,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_product_in_delivery(
     product_id: int,
     delivery_id: int,
@@ -34,7 +44,12 @@ async def get_product_in_delivery(
     return product
 
 
-@product_in_delivery_router.get("/delivery/{delivery_id}", response_model=list[ProductInDeliverySchema], status_code=status.HTTP_200_OK)
+@product_in_delivery_router.get(
+    "/delivery/{delivery_id}",
+    response_model=list[ProductInDeliverySchema],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_products_by_delivery(
     delivery_id: int,
 ) -> list[ProductInDeliverySchema]:
@@ -50,7 +65,9 @@ async def get_products_by_delivery(
 @product_in_delivery_router.post("/add", response_model=ProductInDeliverySchema, status_code=status.HTTP_201_CREATED)
 async def add_product_in_delivery(
     product_dto: ProductInDeliveryCreate,
+current_client: ClientSchema = Depends(get_current_client),
 ) -> ProductInDeliverySchema:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             new_product = await productInDelivery_repo.create_product_in_delivery(
@@ -72,7 +89,9 @@ async def update_product_in_delivery(
     product_id: int,
     delivery_id: int,
     product_dto: ProductInDeliveryCreate,
+current_client: ClientSchema = Depends(get_current_client),
 ) -> ProductInDeliverySchema:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             updated_product = await productInDelivery_repo.update_product_in_delivery(
@@ -91,7 +110,9 @@ async def update_product_in_delivery(
 async def delete_product_in_delivery(
     product_id: int,
     delivery_id: int,
+current_client: ClientSchema = Depends(get_current_client),
 ) -> None:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             await productInDelivery_repo.delete_product_in_delivery(
@@ -103,7 +124,12 @@ async def delete_product_in_delivery(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error.message)
 
 
-@product_in_delivery_router.get("/delivery/{delivery_id}/total_cost", response_model=Decimal, status_code=status.HTTP_200_OK)
+@product_in_delivery_router.get(
+    "/delivery/{delivery_id}/total_cost",
+    response_model=Decimal,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_total_cost_by_delivery(
         delivery_id: int,
 ) -> Decimal:
@@ -119,7 +145,9 @@ async def get_total_cost_by_delivery(
 @product_in_delivery_router.delete("/delivery/{delivery_id}/delete_all", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_all_products_in_delivery(
         delivery_id: int,
+current_client: ClientSchema = Depends(get_current_client),
 ) -> None:
+    check_for_admin_access(client=current_client)
     async with database.session() as session:
         await productInDelivery_repo.delete_all_products_in_delivery(
             session=session,

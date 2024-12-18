@@ -1,8 +1,8 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 
-from project.schemas.user import DishCreate, DishSchema
+from project.schemas.user import DishCreate, DishSchema, ClientSchema
 from project.core.exceptions import DishNotFound, DishAlreadyExists
-from project.api.depends import database, dish_repo
+from project.api.depends import database, dish_repo, check_for_admin_access, get_current_client
 
 dish_router = APIRouter()
 
@@ -15,7 +15,12 @@ async def get_all_dishes() -> list[DishSchema]:
     return all_dishes
 
 
-@dish_router.get("/dish/{dish_id}", response_model=DishSchema, status_code=status.HTTP_200_OK)
+@dish_router.get(
+    "/dish/{dish_id}",
+    response_model=DishSchema,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_dish_by_id(
     dish_id: int,
 ) -> DishSchema:
@@ -51,7 +56,9 @@ async def search_dishes_by_name(
 @dish_router.post("/add_dish", response_model=DishSchema, status_code=status.HTTP_201_CREATED)
 async def add_dish(
     dish_dto: DishCreate,
+    current_client: ClientSchema = Depends(get_current_client),
 ) -> DishSchema:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             new_dish = await dish_repo.create_dish(session=session, dish=dish_dto)
@@ -69,7 +76,9 @@ async def add_dish(
 async def update_dish(
     dish_id: int,
     dish_dto: DishCreate,
+    current_client: ClientSchema = Depends(get_current_client),
 ) -> DishSchema:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             updated_dish = await dish_repo.update_dish(
@@ -86,7 +95,9 @@ async def update_dish(
 @dish_router.delete("/delete_dish/{dish_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_dish(
     dish_id: int,
+    current_client: ClientSchema = Depends(get_current_client),
 ) -> None:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             await dish_repo.delete_dish(session=session, dish_id=dish_id)

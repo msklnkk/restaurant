@@ -48,7 +48,7 @@ async def add_user(
     user_dto: ClientCreate,
     current_client: ClientSchema = Depends(get_current_client),
 ) -> ClientSchema:
-    check_for_admin_access(user=current_client)
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             user_dto.password = get_password_hash(password=user_dto.password)
@@ -69,7 +69,7 @@ async def update_user(
     user_dto: ClientCreate,
     current_client: ClientSchema = Depends(get_current_client),
 ) -> ClientSchema:
-    check_for_admin_access(user=current_client)
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             user_dto.password = get_password_hash(password=user_dto.password)
@@ -92,7 +92,7 @@ async def delete_user(
     user_id: int,
     current_client: ClientSchema = Depends(get_current_client),
 ) -> None:
-    check_for_admin_access(user=current_client)
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             user = await client_repo.delete_user(session=session, user_id=user_id)

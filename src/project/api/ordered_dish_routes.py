@@ -1,13 +1,18 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 
-from project.schemas.user import OrderedDishCreate, OrderedDishSchema
+from project.schemas.user import OrderedDishCreate, OrderedDishSchema, ClientSchema
 from project.core.exceptions import OrderedDishNotFound, OrderedDishAlreadyExists
-from project.api.depends import database, orderedDish_repo
+from project.api.depends import database, orderedDish_repo, get_current_client
 
 ordered_dish_router = APIRouter()
 
 
-@ordered_dish_router.get("/all", response_model=list[OrderedDishSchema], status_code=status.HTTP_200_OK)
+@ordered_dish_router.get(
+    "/all",
+    response_model=list[OrderedDishSchema],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_all_ordered_dishes() -> list[OrderedDishSchema]:
     async with database.session() as session:
         all_ordered_dishes = await orderedDish_repo.get_all_ordered_dishes(session=session)
@@ -15,7 +20,12 @@ async def get_all_ordered_dishes() -> list[OrderedDishSchema]:
     return all_ordered_dishes
 
 
-@ordered_dish_router.get("/order/{order_id}/dish/{dish_id}", response_model=OrderedDishSchema, status_code=status.HTTP_200_OK)
+@ordered_dish_router.get(
+    "/order/{order_id}/dish/{dish_id}",
+    response_model=OrderedDishSchema,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_ordered_dish(
     order_id: int,
     dish_id: int,
@@ -33,7 +43,12 @@ async def get_ordered_dish(
     return ordered_dish
 
 
-@ordered_dish_router.get("/order/{order_id}", response_model=list[OrderedDishSchema], status_code=status.HTTP_200_OK)
+@ordered_dish_router.get(
+    "/order/{order_id}",
+    response_model=list[OrderedDishSchema],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_dishes_by_order(
     order_id: int,
 ) -> list[OrderedDishSchema]:

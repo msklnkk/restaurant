@@ -1,13 +1,18 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 
-from project.schemas.user import OrderedDrinkCreate, OrderedDrinkSchema
+from project.schemas.user import OrderedDrinkCreate, OrderedDrinkSchema, ClientSchema
 from project.core.exceptions import OrderedDrinkNotFound, OrderedDrinkAlreadyExists
-from project.api.depends import database, orderedDrink_repo
+from project.api.depends import database, orderedDrink_repo, get_current_client
 
 ordered_drink_router = APIRouter()
 
 
-@ordered_drink_router.get("/ordered_drinks", response_model=list[OrderedDrinkSchema], status_code=status.HTTP_200_OK)
+@ordered_drink_router.get(
+    "/ordered_drinks",
+    response_model=list[OrderedDrinkSchema],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_all_ordered_drinks() -> list[OrderedDrinkSchema]:
     async with database.session() as session:
         ordered_drinks = await orderedDrink_repo.get_all_ordered_drinks(session=session)
@@ -15,8 +20,12 @@ async def get_all_ordered_drinks() -> list[OrderedDrinkSchema]:
     return ordered_drinks
 
 
-@ordered_drink_router.get("/ordered_drink/order/{order_id}/drink/{drink_id}", response_model=OrderedDrinkSchema,
-            status_code=status.HTTP_200_OK)
+@ordered_drink_router.get(
+    "/ordered_drink/order/{order_id}/drink/{drink_id}",
+    response_model=OrderedDrinkSchema,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_ordered_drink(
         order_id: int,
         drink_id: int,
@@ -34,7 +43,12 @@ async def get_ordered_drink(
     return ordered_drink
 
 
-@ordered_drink_router.get("/ordered_drinks/order/{order_id}", response_model=list[OrderedDrinkSchema], status_code=status.HTTP_200_OK)
+@ordered_drink_router.get(
+    "/ordered_drinks/order/{order_id}",
+    response_model=list[OrderedDrinkSchema],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_drinks_by_order(
         order_id: int,
 ) -> list[OrderedDrinkSchema]:

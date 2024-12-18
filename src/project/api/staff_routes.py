@@ -1,14 +1,19 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 
-from project.schemas.user import StaffCreate, StaffSchema
+from project.schemas.user import StaffCreate, StaffSchema, ClientSchema
 from project.core.exceptions import StaffNotFound, StaffAlreadyExists
-from project.api.depends import database, staff_repo
+from project.api.depends import database, staff_repo, check_for_admin_access, get_current_client
 
 staff_router = APIRouter()
 
 
 
-@staff_router.get("/all_staff", response_model=list[StaffSchema], status_code=status.HTTP_200_OK)
+@staff_router.get(
+    "/all_staff",
+    response_model=list[StaffSchema],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_all_staff() -> list[StaffSchema]:
     async with database.session() as session:
         all_staff = await staff_repo.get_all_staff(session=session)
@@ -16,7 +21,12 @@ async def get_all_staff() -> list[StaffSchema]:
     return all_staff
 
 
-@staff_router.get("/staff/{staff_id}", response_model=StaffSchema, status_code=status.HTTP_200_OK)
+@staff_router.get(
+    "/staff/{staff_id}",
+    response_model=StaffSchema,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_staff_by_id(
     staff_id: int,
 ) -> StaffSchema:
@@ -32,7 +42,9 @@ async def get_staff_by_id(
 @staff_router.post("/add_staff", response_model=StaffSchema, status_code=status.HTTP_201_CREATED)
 async def add_staff(
     staff_dto: StaffCreate,
+current_client: ClientSchema = Depends(get_current_client),
 ) -> StaffSchema:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             new_staff = await staff_repo.create_staff(session=session, staff=staff_dto)
@@ -50,7 +62,9 @@ async def add_staff(
 async def update_staff(
     staff_id: int,
     staff_dto: StaffCreate,
+current_client: ClientSchema = Depends(get_current_client),
 ) -> StaffSchema:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             updated_staff = await staff_repo.update_staff(
@@ -67,7 +81,9 @@ async def update_staff(
 @staff_router.delete("/delete_staff/{staff_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_staff(
     staff_id: int,
+current_client: ClientSchema = Depends(get_current_client),
 ) -> None:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             staff = await staff_repo.delete_staff(session=session, staff_id=staff_id)

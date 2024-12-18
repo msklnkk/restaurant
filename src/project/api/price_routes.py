@@ -1,21 +1,31 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 
-from project.schemas.user import PriceSchema, PriceCreate
+from project.schemas.user import PriceSchema, PriceCreate, ClientSchema
 from project.core.exceptions import PriceNotFound, PriceAlreadyExists
-from project.api.depends import database, price_repo
+from project.api.depends import database, price_repo, check_for_admin_access, get_current_client
 
 price_router = APIRouter()
 
 
 
-@price_router.get("/all_prices", response_model=list[PriceSchema], status_code=status.HTTP_200_OK)
+@price_router.get(
+    "/all_prices",
+    response_model=list[PriceSchema],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_all_prices() -> list[PriceSchema]:
     async with database.session() as session:
         all_prices = await price_repo.get_all_prices(session=session)
     return all_prices
 
 
-@price_router.get("/price/{dish_id}", response_model=PriceSchema, status_code=status.HTTP_200_OK)
+@price_router.get(
+    "/price/{dish_id}",
+    response_model=PriceSchema,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_price_by_dish_id(
     dish_id: int,
 ) -> PriceSchema:
@@ -31,7 +41,9 @@ async def get_price_by_dish_id(
 async def add_price(
     dish_id: int,
     price_dto: PriceCreate,
+current_client: ClientSchema = Depends(get_current_client),
 ) -> PriceSchema:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             new_price = await price_repo.create_price(
@@ -53,7 +65,9 @@ async def add_price(
 async def update_price(
     dish_id: int,
     price_dto: PriceCreate,
+current_client: ClientSchema = Depends(get_current_client),
 ) -> PriceSchema:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             updated_price = await price_repo.update_price(
@@ -70,7 +84,9 @@ async def update_price(
 @price_router.delete("/delete_price/{dish_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_price(
     dish_id: int,
+current_client: ClientSchema = Depends(get_current_client),
 ) -> None:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             await price_repo.delete_price(session=session, dish_id=dish_id)

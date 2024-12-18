@@ -69,9 +69,10 @@ async def get_current_client(
     if client is None:
         raise CredentialsException(detail=AUTH_EXCEPTION_MESSAGE)
     return client
+
 def check_for_admin_access(client: ClientSchema) -> None:
     if not client.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Только админ имеет права добавлять/изменять/удалять клиентов"
+            detail="Только админ имеет права добавлять/изменять/удалять данные"
         )

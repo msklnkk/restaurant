@@ -1,15 +1,20 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from datetime import date
 
 
-from project.schemas.user import DeliveryCreate, DeliverySchema
+from project.schemas.user import DeliveryCreate, DeliverySchema, ClientSchema
 from project.core.exceptions import DeliveryNotFound, DeliveryAlreadyExists
-from project.api.depends import database, delivery_repo
+from project.api.depends import database, delivery_repo, get_current_client, check_for_admin_access
 
 delivery_router = APIRouter()
 
 
-@delivery_router.get("/all_deliveries", response_model=list[DeliverySchema], status_code=status.HTTP_200_OK)
+@delivery_router.get(
+    "/all_deliveries",
+    response_model=list[DeliverySchema],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_all_deliveries() -> list[DeliverySchema]:
     async with database.session() as session:
         all_deliveries = await delivery_repo.get_all_deliveries(session=session)
@@ -17,7 +22,12 @@ async def get_all_deliveries() -> list[DeliverySchema]:
     return all_deliveries
 
 
-@delivery_router.get("/delivery/{delivery_id}", response_model=DeliverySchema, status_code=status.HTTP_200_OK)
+@delivery_router.get(
+    "/delivery/{delivery_id}",
+    response_model=DeliverySchema,
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_delivery_by_id(
     delivery_id: int,
 ) -> DeliverySchema:
@@ -33,7 +43,12 @@ async def get_delivery_by_id(
     return delivery
 
 
-@delivery_router.get("/deliveries_by_date/{delivery_date}", response_model=list[DeliverySchema], status_code=status.HTTP_200_OK)
+@delivery_router.get(
+    "/deliveries_by_date/{delivery_date}",
+    response_model=list[DeliverySchema],
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_client)],
+)
 async def get_deliveries_by_date(
     delivery_date: date,
 ) -> list[DeliverySchema]:
@@ -70,7 +85,9 @@ async def add_delivery(
 async def update_delivery(
     delivery_id: int,
     delivery_dto: DeliveryCreate,
+    current_client: ClientSchema = Depends(get_current_client),
 ) -> DeliverySchema:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             updated_delivery = await delivery_repo.update_delivery(
@@ -84,10 +101,15 @@ async def update_delivery(
     return updated_delivery
 
 
-@delivery_router.delete("/delete_delivery/{delivery_id}", status_code=status.HTTP_204_NO_CONTENT)
+@delivery_router.delete(
+    "/delete_delivery/{delivery_id}",
+    status_code=status.HTTP_204_NO_CONTENT
+)
 async def delete_delivery(
     delivery_id: int,
+    current_client: ClientSchema = Depends(get_current_client),
 ) -> None:
+    check_for_admin_access(client=current_client)
     try:
         async with database.session() as session:
             delivery = await delivery_repo.delete_delivery(
